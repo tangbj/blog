@@ -1,0 +1,36 @@
+.blog
+  header
+    h4.logo DAN'S CODING BLOG
+    .menubutton
+      i.icon-reorder
+    nav
+      ul
+        li
+          a(href='/blog') BLOG
+    br.clear
+
+  section(ng-repeat='post in posts')
+    .eight.columns
+      h4.post_title
+        a(href='/blog') {{ post.title }}
+      span.post_date {{ post.created | date:'dd MMM yyyy' }}
+      p {{ post.text }}
+      //- blockquote Blockquote here
+      //- a(href='single-post.html')
+      //-   button.float_right READ MORE
+      ul
+        li.categories(ng-repeat='category in post.categories') {{ category }}
+    br.clear
+
+  //- .pagination
+  //-   button.light
+  //-     i.icon-chevron-left
+  //-   button.light 1
+  //-   button 2
+  //-   button.light 3
+  //-   button.light 4
+  //-   button.light 5
+  //-   button.light 6
+  //-   button.light
+  //-     i.icon-chevron-right
+

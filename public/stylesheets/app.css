@@ -1,0 +1,56 @@
+/* app css stylesheet */
+/* mixins */
+.menu {
+  list-style: none;
+  border-bottom: 0.1em solid #000;
+  margin-bottom: 2em;
+  padding: 0 0 0.5em;
+}
+.menu:before {
+  content: "[";
+}
+.menu:after {
+  content: "]";
+}
+.menu > li {
+  display: inline;
+}
+.menu > li:before {
+  content: "|";
+  padding-right: 0.3em;
+}
+.menu > li:nth-child(1):before {
+  content: "";
+  padding: 0;
+}
+.blog .categories {
+  display: inline-block;
+  margin-left: 8px;
+}
+.blog .categories:first-child {
+  margin-left: 0;
+}
+.newpost {
+  margin: 0 10px;
+}
+.newpost .alert-success {
+  width: 500px;
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+  color: #468847;
+  padding: 8px 35px 8px 14px;
+  margin-bottom: 20px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+.newpost input,
+.newpost textarea,
+.newpost button[type='submit'] {
+  margin: 3px 0;
+}
+.newpost input[type='text'],
+.newpost textarea {
+  width: 750px;
+}
