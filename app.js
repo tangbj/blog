@@ -14,6 +14,13 @@ var express = require('express'),
   stylus = require('stylus'),
   nib = require('nib');
 
+console.log('/**************')
+console.log('**************')
+console.log('**************')
+console.log(env)
+console.log('**************')
+console.log('**************')
+console.log('**************/')
 mongoose.connect(config[env]['db']);
 
 
