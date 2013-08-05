@@ -8,13 +8,13 @@ var express = require('express'),
   api = require('./routes/api'),
   http = require('http'),
   path = require('path'),
-  env = process.env.NODE_ENV || 'production',
+  // env = process.env.NODE_ENV || 'production',
+  env = 'production',
   config = require('./config'),
   mongoose = require('mongoose'),
   stylus = require('stylus'),
   nib = require('nib');
 
-console.log(config[env]['db'])
 mongoose.connect(config[env]['db']);
 
 

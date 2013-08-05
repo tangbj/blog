@@ -4,7 +4,7 @@ module.exports = {
     collections: ['posts']
   },
   production: {
-    db: ' mongodb://admin:coding@ds037468.mongolab.com:37468/heroku_app17320512',
+    db: 'mongodb://admin:coding@ds037468.mongolab.com:37468/heroku_app17320512',
     collections: ['posts']
   }
 }
