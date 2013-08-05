@@ -9,12 +9,12 @@
           a(href='/blog') BLOG
     br.clear
 
-  section(ng-repeat='post in posts')
+  section(ng-repeat='post in posts | orderBy:"-created"')
     .eight.columns
       h4.post_title
         a(href='/blog') {{ post.title }}
       span.post_date {{ post.created | date:'dd MMM yyyy' }}
-      p {{ post.text }}
+      div(ng-bind-html-unsafe='post.editedText')
       //- blockquote Blockquote here
       //- a(href='single-post.html')
       //-   button.float_right READ MORE
