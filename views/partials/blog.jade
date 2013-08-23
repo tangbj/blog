@@ -14,7 +14,7 @@
       h4.post_title
         a(href='/blog') {{ post.title }}
       span.post_date {{ post.created | date:'dd MMM yyyy' }}
-      div(ng-bind-html-unsafe='post.editedText')
+      div(ng-bind-html='post.editedText')
       //- blockquote Blockquote here
       //- a(href='single-post.html')
       //-   button.float_right READ MORE
