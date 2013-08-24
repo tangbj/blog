@@ -16,7 +16,7 @@ exports.name = function (req, res) {
 
 exports.getAllPosts = function(req, res) {
   Post.find({}, function(err, results) {
-    if (err) throw err;
+    if (err || results.length === 0) return res.send(500, 'broken');;
     //converts to markdown format
     for(var i = 0, len = results.length; i < len; i++) {
       results[i].text = markdown.toHTML(results[i].text);
@@ -42,9 +42,9 @@ exports.getAllPosts = function(req, res) {
 exports.getPost = function(req, res) {
   var queryKey = req.params.queryKey;
   Post.find({queryKey: queryKey}, function(err, results) {
-    if(err) {
+    if(err || results.length === 0) {
       console.log('Error');
-      return;
+      return res.send(404, 'broken');
     }
     //converts to markdown format
     results[0].text = markdown.toHTML(results[0].text);

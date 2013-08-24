@@ -29,13 +29,14 @@ angular.module('myApp.controllers', []).
     });
 
   }).
-  controller('BlogCtrl', ['$scope', '$http', '$routeParams',
-    function ($scope, $http, $routeParams) {
+  controller('BlogCtrl', ['$scope', '$http', '$routeParams', '$location',
+    function ($scope, $http, $routeParams, $location) {
 
+    console.log($routeParams.queryKey)
     var apiAddress;
 
     //if user is looking at the blog index, get all posts, otherwise get one post
-    if ($routeParams.queryKey === '') {
+    if ($routeParams.queryKey === '' || typeof $routeParams.queryKey === 'undefined') {
       apiAddress = '/api/getAllPosts';
     } else {
       apiAddress = '/api/getpost/' + $routeParams.queryKey;
@@ -49,6 +50,10 @@ angular.module('myApp.controllers', []).
       _.each($scope.posts, function(post) {
         post.editedText = formatText(post.text);
       });
+    }).error(function() {
+      //if there is problem, redirect to main page
+      console.log('error');
+      $location.path('/blog');
     })
 
     //main function that splits the main text into paragraphs based on \n\n
