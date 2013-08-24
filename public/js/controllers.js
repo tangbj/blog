@@ -24,7 +24,9 @@ angular.module('myApp.controllers', []).
       //for each post, edits the text based on special characters (e.g. \n)
       //and stores edited text in editedText attribute; this is what is shown in the blog
       _.each($scope.posts, function(post) {
+        // post.text = post.text.replace(/</g, '&lt;');
         post.editedText = formatText(post.text);
+        // post.editedText = post.text.replace(/</g, '&lt;');
       });
     })
 
@@ -74,4 +76,23 @@ angular.module('myApp.controllers', []).
       scope.data = {};
     }
 
-  }]);
+  }]).
+  controller('EditPostCtrl', ['$scope', '$http', '$location', function($scope, $http, $location) {
+    var id = $location.path().split('/editpost/')[1];
+    if(typeof id !== 'undefined') {
+      $http.get('/api/getpost/' + id).success(function(data) {
+        $scope.data = data[0];
+      })
+    }
+
+    $scope.submitPost = function (data) {
+      $http.put('api/editpost/' + id, data).success(function(val) {
+        // resetsFields($scope);
+        $scope.showSuccessMessage = true;
+      })
+    }
+
+  }])
+
+
+  ;

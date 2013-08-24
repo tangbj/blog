@@ -1,0 +1,10 @@
+div.newpost
+  h2 Edit Post
+  form(ng-submit='submitPost(data)')
+    .alert-success(ng-class='{hidden: !showSuccessMessage}') Successfully uploaded
+    input(type='text', placeholder='Title', ng-model='data.title', required)
+    input(type='text', placeholder='Categories', ng-model='data.categories', required)
+    br
+    textarea(placeholder='Text...', rows=20, ng-model='data.text', required)
+    br
+    button(type='submit') Save Post

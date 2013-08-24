@@ -23,6 +23,10 @@ config(function ($routeProvider, $locationProvider) {
       templateUrl: 'partials/newpost',
       controller: 'NewPostCtrl'
     }).
+    when('/editpost/:id', {
+      templateUrl: 'partials/editpost',
+      controller: 'EditPostCtrl'
+    }).    
     otherwise({
       redirectTo: '/blog'
     });

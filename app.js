@@ -66,9 +66,10 @@ app.get('/', routes.index);
 app.get('/partials/:name', routes.partials);
 
 // JSON API
-app.get('/api/name', api.name);
 app.get('/api/getallposts', api.getAllPosts);
+app.get('/api/getpost/:id', api.getPost);
 app.post('/api/newpost', api.newPost);
+app.put('/api/editpost/:id', api.editPost);
 
 // redirect all others to the index (HTML5 history)
 app.get('*', routes.index);

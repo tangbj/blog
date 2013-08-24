@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 
 require('../models/post');
 var Post = mongoose.model('Post');
+var markdown = require('markdown').markdown;
 /*
  * Serve JSON to our AngularJS client
  */
@@ -15,6 +16,33 @@ exports.name = function (req, res) {
 exports.getAllPosts = function(req, res) {
   Post.find({}, function(err, results) {
     if (err) throw err;
+    for(var i = 0, len = results.length; i < len; i++) {
+      results[i].text = markdown.toHTML(results[i].text);
+    }
+    return res.json(results);
+  })
+}
+
+//helper function that loops through each post, removes some html tags, and saves the document
+// // function() {
+//     Post.find({}, function(err, results) {
+//     for(var i = 0, len = results.length; i < len; i++) {
+//       results[i].text = results[i].text.replace(/\<br\>|<source>|<\/source>|<b>|<\/b>|<em>|<\/em>/g, '');
+//       console.log(results[i].text)
+//       results[i].save();
+//     }
+//     return res.json(results)
+//   })
+// }
+
+exports.getPost = function(req, res) {
+  var id = req.params.id;
+  Post.find({_id: id}, function(err, results) {
+    if(err) {
+      console.log('Error');
+      return;
+    }
+
     return res.json(results);
   })
 }
@@ -43,4 +71,31 @@ exports.newPost = function(req, res) {
       });
     })
   }
+ }
+
+/* 
+ * PUT 
+ */ 
+ exports.editPost = function(req, res) {
+  console.log('tataa')
+  if (req.body) {
+    console.log(req.body.categories)
+    var title = req.body.title,
+      text = req.body.text,
+      categories = req.body.categories,
+      id = req.params.id;
+    }
+
+  Post.findOneAndUpdate({_id: id}, {
+    title: title, 
+    text: text, 
+    categories: categories}, function(err, results) {
+    if(err) {
+      console.log('Error');
+      return;
+    }
+    return res.json( {
+      status: 'okay'
+    })
+  });
  }
