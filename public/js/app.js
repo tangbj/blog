@@ -11,6 +11,10 @@ angular.module('myApp', [
 ]).
 config(function ($routeProvider, $locationProvider) {
   $routeProvider.
+    when('/blog/:queryKey', {
+      templateUrl: 'partials/blog',
+      controller: 'BlogCtrl'
+    }).  
     when('/blog', {
       templateUrl: 'partials/blog',
       controller: 'BlogCtrl'

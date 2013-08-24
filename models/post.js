@@ -14,8 +14,8 @@ var PostSchema = new Schema({
     default: 'text'
   },
   categories: [],
-  others: {type: Schema.Types.Mixed, default: []}
+  others: {type: Schema.Types.Mixed, default: []},
+  queryKey: String
 });
 
 mongoose.model('Post', PostSchema);
-console.log('creating Post')

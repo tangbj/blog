@@ -12,7 +12,7 @@
   section(ng-repeat='post in posts | orderBy:"-created"')
     .eight.columns
       h4.post_title
-        a(href='/blog') {{ post.title }}
+        a(href='/blog/{{post.queryKey}}') {{ post.title }}
       span.post_date {{ post.created | date:'dd MMM yyyy' }}
       div(ng-bind-html='post.editedText')
       //- blockquote Blockquote here
