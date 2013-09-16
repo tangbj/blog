@@ -85,7 +85,6 @@ exports.newPost = function(req, res) {
  * PUT 
  */ 
  exports.editPost = function(req, res) {
-  console.log('tataa')
   if (req.body) {
     console.log(req.body.categories)
     var title = req.body.title,
@@ -94,7 +93,8 @@ exports.newPost = function(req, res) {
       id = req.params.id;
     }
 
-  Post.findOneAndUpdate({_id: id}, {
+  console.log(id)
+  Post.findOneAndUpdate({queryKey: id}, {
     title: title, 
     text: text, 
     categories: categories}, function(err, results) {
