@@ -220,13 +220,15 @@ app.factory('AttackModifiersFactory', function(PokemonFactory) {
   //the attack modifiers that will used when a pokemon is attacking 
   //if elements are not defined, assume base value of 1
   function getAttackModifiers(attack, defense) {
-    return attackModifiers[attack][defense] || 1;
+    if (typeof attackModifiers[attack][defense] === 'undefined') return 1;
+    return attackModifiers[attack][defense];
   }
 
   //the attack modifiers that will used when a pokemon is defending 
   //if elements are not defined, assume base value of 1
   function getDefenseModifiers(defense, attack) {
-    return defenseModifiers[defense][attack] || 1;
+    if (typeof defenseModifiers[defense][attack] === 'undefined') return 1;
+    return defenseModifiers[defense][attack];
   }
 
   //given a pokemon name, return the elements of the pokemon
