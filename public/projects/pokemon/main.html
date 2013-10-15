@@ -16,7 +16,7 @@
 
       <ul>
         <li ng-repeat='pokemon in pokemonModifiers'> 
-          <p>Name: {{ pokemon.name }}</p>
+          <p>Name: {{ pokemon.editedName }}</p>
           <ul>
             <li ng-repeat='element in pokemon.editedModifiers'>{{ element.element }}: {{ element.modifier }}</li>
           </ul>

@@ -10,12 +10,12 @@ app.controller('PokemonCtrl', ['$scope', 'AttackModifiersFactory', function($sco
   }
 
   $scope.searchForPokemon = function() {
-    
     var searchResults = findPokemon($scope.data.inputPokemon);
     for (var i = 0; i < searchResults.length; i++) {
       //converts name to full upper case
-      searchResults[i].name = searchResults[i].name.toUpperCase();
+      searchResults[i].editedName = searchResults[i].name.toUpperCase();
 
+      // console.log(searchResults)
       var temp = [];
       for (var key in searchResults[i].modifiers) {
         //if modifier is 1, do not show
@@ -27,12 +27,10 @@ app.controller('PokemonCtrl', ['$scope', 'AttackModifiersFactory', function($sco
         }
       } //end for loop
 
-      console.log(temp)
       //sort according to modifier (descending order)
       temp.sort(function(a, b) {
         return b.modifier - a.modifier;
       })
-      console.log(temp)
       searchResults[i].editedModifiers = temp;
     }
 
