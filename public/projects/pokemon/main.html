@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js'></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js'></script>
+    <script src='main.js'></script>
+  </head>
+  <body ng-app='pokemonApp'>
+    <div ng-controller='PokemonCtrl'>
+      <p> Step 1: Input pokemon name (partial searches - e.g. char for Charmander are supported)</p>
+      <p> Step 2: Click SEARCH</p>
+      <p> Step 3: The effectiveness of the respective elements are shown (the higher the number, the more effective the attack)</p>
+      <form ng-submit='searchForPokemon()'>
+        <input type='text' ng-model='data.inputPokemon' />
+        <input type='submit' value='Search' />
+      </form>
+
+      <ul>
+        <li ng-repeat='pokemon in pokemonModifiers'> 
+          <p>Name: {{ pokemon.name }}</p>
+          <ul>
+            <li ng-repeat='element in pokemon.editedModifiers'>{{ element.element }}: {{ element.modifier }}</li>
+          </ul>
+        </li>
+      </ul>
+
+    </div>
+  </body>
+</html>
