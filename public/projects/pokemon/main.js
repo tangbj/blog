@@ -3,6 +3,7 @@ var app = angular.module('pokemonApp', []);
 app.controller('PokemonCtrl', ['$scope', 'AttackModifiersFactory', function($scope, AttackModifiersFactory) {
 
   function findPokemon(searchName) {
+    searchName = searchName.toLowerCase();
     var results =  _.filter(AttackModifiersFactory.overallPokemonModifiers, function(pokemon) {
       return pokemon['name'].indexOf(searchName) !== -1;
     })
@@ -237,6 +238,31 @@ app.factory('AttackModifiersFactory', function(PokemonFactory) {
     return temp['elements'];
   }
 
+  //given a pokemon's resultsMatrix and its ability, modify the passed matrix
+  function modifyResultMatrixForPokemonAbility(matrix, ability) {
+    if (ability === 'sapSipper') {
+      matrix['grass'] = 0;
+    } 
+
+    else if (ability === 'heatProof') {
+      matrix['fire'] *= 0.5;
+    }
+
+    //absorbs electric attack
+    else if (ability === 'voltAbsorb') {
+      matrix['electric'] = -1;
+    }    
+
+    //absorbs water attack
+    else if (ability === 'waterAbsorb') {
+      matrix['water'] = -1;
+    } 
+
+    else if (ability === 'levitate') {
+      matrix['ground'] = 0;
+    }
+  }
+
   //given a pokemon's name, return a matrix of the various elements attack modifiers against it
   function computeResultsMatrix(name) {
     var pokemonElements = getPokemonElement(name);
@@ -258,14 +284,31 @@ app.factory('AttackModifiersFactory', function(PokemonFactory) {
 
       } //end inner for loop
     } //end outer for loop
+
     return resultsMatrix;
-  }
+  } //end computeResultsMatrix function
 
   for (var i = 0; i < PokemonFactory.length; i++) {
-    var pokemon = PokemonFactory[i].name;
+    var pokemon = PokemonFactory[i].name, ability, resultsMatrix;
+
+    if (typeof PokemonFactory[i].abilities === 'undefined') {
+      abilities = [];
+    } else {
+      abilities = PokemonFactory[i].abilities;
+    }
+
+    //obtains the results matrix for each pokemon and modifies it accordingly to its abilities
+    resultsMatrix = computeResultsMatrix(pokemon);
+
+    for ( var j = 0; j < abilities.length; j++) {
+      modifyResultMatrixForPokemonAbility(resultsMatrix, abilities[j]);  
+    }
+    
     overallPokemonModifiers.push({
       name: pokemon,
-      modifiers: computeResultsMatrix(pokemon)
+      elements: PokemonFactory[i].elements,
+      abilities: PokemonFactory[i].abilities,
+      modifiers: resultsMatrix
     });
   }
   this.overallPokemonModifiers = overallPokemonModifiers;
@@ -335,9 +378,9 @@ app.factory('PokemonFactory', function() {
     {name: "primeape", elements: ["fighting"]},
     {name: "growlithe", elements: ["fire"]},
     {name: "arcanine", elements: ["fire"]},
-    {name: "poliwag", elements: ["water"]},
-    {name: "poliwhirl", elements: ["water"]},
-    {name: "poliwrath", elements: ["water", "fighting"]},
+    {name: "poliwag", elements: ["water"], abilities: ['waterAbsorb']},
+    {name: "poliwhirl", elements: ["water"], abilities: ['waterAbsorb']},
+    {name: "poliwrath", elements: ["water", "fighting"], abilities: ['waterAbsorb']},
     {name: "abra", elements: ["psychic"]},
     {name: "kadabra", elements: ["psychic"]},
     {name: "alakazam", elements: ["psychic"]},
@@ -367,9 +410,9 @@ app.factory('PokemonFactory', function() {
     {name: "muk", elements: ["poison"]},
     {name: "shellder", elements: ["water"]},
     {name: "cloyster", elements: ["water", "ice"]},
-    {name: "gastly", elements: ["ghost", "poison"]},
-    {name: "haunter", elements: ["ghost", "poison"]},
-    {name: "gengar", elements: ["ghost", "poison"]},
+    {name: "gastly", elements: ["ghost", "poison"], abilities: ['levitate']},
+    {name: "haunter", elements: ["ghost", "poison"], abilities: ['levitate']},
+    {name: "gengar", elements: ["ghost", "poison"], abilities: ['levitate']},
     {name: "onix", elements: ["rock", "ground"]},
     {name: "drowzee", elements: ["psychic"]},
     {name: "hypno", elements: ["psychic"]},
@@ -384,8 +427,8 @@ app.factory('PokemonFactory', function() {
     {name: "hitmonlee", elements: ["fighting"]},
     {name: "hitmonchan", elements: ["fighting"]},
     {name: "lickitung", elements: ["normal"]},
-    {name: "koffing", elements: ["poison"]},
-    {name: "weezing", elements: ["poison"]},
+    {name: "koffing", elements: ["poison"], abilities: ['levitate']},
+    {name: "weezing", elements: ["poison"], abilities: ['levitate']},
     {name: "rhyhorn", elements: ["ground", "rock"]},
     {name: "rhydon", elements: ["ground", "rock"]},
     {name: "chansey", elements: ["normal"]},
@@ -406,11 +449,11 @@ app.factory('PokemonFactory', function() {
     {name: "tauros", elements: ["normal"]},
     {name: "magikarp", elements: ["water"]},
     {name: "gyarados", elements: ["water", "flying"]},
-    {name: "lapras", elements: ["water", "ice"]},
+    {name: "lapras", elements: ["water", "ice"], abilities: ['waterAbsorb']},
     {name: "ditto", elements: ["normal"]},
     {name: "eevee", elements: ["normal"]},
-    {name: "vaporeon", elements: ["water"]},
-    {name: "jolteon", elements: ["electric"]},
+    {name: "vaporeon", elements: ["water"], abilities: ['waterAbsorb']},
+    {name: "jolteon", elements: ["electric"], abilities: ['voltAbsorb']},
     {name: "flareon", elements: ["fire"]},
     {name: "porygon", elements: ["normal"]},
     {name: "omanyte", elements: ["rock", "water"]},
@@ -445,8 +488,8 @@ app.factory('PokemonFactory', function() {
     {name: "spinarak", elements: ["bug", "poison"]},
     {name: "ariados", elements: ["bug", "poison"]},
     {name: "crobat", elements: ["poison", "flying"]},
-    {name: "chinchou", elements: ["water", "electric"]},
-    {name: "lanturn", elements: ["water", "electric"]},
+    {name: "chinchou", elements: ["water", "electric"], abilities: ['voltAbsorb', 'waterAbsorb']},
+    {name: "lanturn", elements: ["water", "electric"], abilities: ['voltAbsorb', 'waterAbsorb']},
     {name: "pichu", elements: ["electric"]},
     {name: "cleffa", elements: ["fairy"]},
     {name: "igglybuff", elements: ["normal", "fairy"]},
@@ -458,10 +501,10 @@ app.factory('PokemonFactory', function() {
     {name: "flaaffy", elements: ["electric"]},
     {name: "ampharos", elements: ["electric"]},
     {name: "bellossom", elements: ["grass"]},
-    {name: "marill", elements: ["water", "fairy"]},
-    {name: "azumarill", elements: ["water", "fairy"]},
+    {name: "marill", elements: ["water", "fairy"], abilities: ['sapSipper']},
+    {name: "azumarill", elements: ["water", "fairy"], abilities: ['sapSipper']},
     {name: "sudowoodo", elements: ["rock"]},
-    {name: "politoed", elements: ["water"]},
+    {name: "politoed", elements: ["water"], abilities: ['waterAbsorb']},
     {name: "hoppip", elements: ["grass", "flying"]},
     {name: "skiploom", elements: ["grass", "flying"]},
     {name: "jumpluff", elements: ["grass", "flying"]},
@@ -469,16 +512,16 @@ app.factory('PokemonFactory', function() {
     {name: "sunkern", elements: ["grass"]},
     {name: "sunflora", elements: ["grass"]},
     {name: "yanma", elements: ["bug", "flying"]},
-    {name: "wooper", elements: ["water", "ground"]},
-    {name: "quagsire", elements: ["water", "ground"]},
+    {name: "wooper", elements: ["water", "ground"], abilities: ['waterAbsorb']},
+    {name: "quagsire", elements: ["water", "ground"], abilities: ['waterAbsorb']},
     {name: "espeon", elements: ["psychic"]},
     {name: "umbreon", elements: ["dark"]},
     {name: "murkrow", elements: ["dark", "flying"]},
     {name: "slowking", elements: ["water", "psychic"]},
-    {name: "misdreavus", elements: ["ghost"]},
-    {name: "unown", elements: ["psychic"]},
+    {name: "misdreavus", elements: ["ghost"], abilities: ['levitate']},
+    {name: "unown", elements: ["psychic"], abilities: ['levitate']},
     {name: "wobbuffet", elements: ["psychic"]},
-    {name: "girafarig", elements: ["normal", "psychic"]},
+    {name: "girafarig", elements: ["normal", "psychic"], abilities: ['sapSipper']},
     {name: "pineco", elements: ["bug"]},
     {name: "forretress", elements: ["bug", "steel"]},
     {name: "dunsparce", elements: ["normal"]},
@@ -501,7 +544,7 @@ app.factory('PokemonFactory', function() {
     {name: "remoraid", elements: ["water"]},
     {name: "octillery", elements: ["water"]},
     {name: "delibird", elements: ["ice", "flying"]},
-    {name: "mantine", elements: ["water", "flying"]},
+    {name: "mantine", elements: ["water", "flying"], abilities: ['waterAbsorb']},
     {name: "skarmory", elements: ["steel", "flying"]},
     {name: "houndour", elements: ["dark", "fire"]},
     {name: "houndoom", elements: ["dark", "fire"]},
@@ -509,18 +552,18 @@ app.factory('PokemonFactory', function() {
     {name: "phanpy", elements: ["ground"]},
     {name: "donphan", elements: ["ground"]},
     {name: "porygon2", elements: ["normal"]},
-    {name: "stantler", elements: ["normal"]},
+    {name: "stantler", elements: ["normal"], abilities: ['sapSipper']},
     {name: "smeargle", elements: ["normal"]},
     {name: "tyrogue", elements: ["fighting"]},
     {name: "hitmontop", elements: ["fighting"]},
     {name: "smoochum", elements: ["ice", "psychic"]},
     {name: "elekid", elements: ["electric"]},
     {name: "magby", elements: ["fire"]},
-    {name: "miltank", elements: ["normal"]},
+    {name: "miltank", elements: ["normal"], abilities: ['sapSipper']},
     {name: "blissey", elements: ["normal"]},
-    {name: "raikou", elements: ["electric"]},
+    {name: "raikou", elements: ["electric"], abilities: ['voltAbsorb']},
     {name: "entei", elements: ["fire"]},
-    {name: "suicune", elements: ["water"]},
+    {name: "suicune", elements: ["water"], abilities: ['waterAbsorb']},
     {name: "larvitar", elements: ["rock", "ground"]},
     {name: "pupitar", elements: ["rock", "ground"]},
     {name: "tyranitar", elements: ["rock", "dark"]},
@@ -573,7 +616,7 @@ app.factory('PokemonFactory', function() {
     {name: "exploud", elements: ["normal"]},
     {name: "makuhita", elements: ["fighting"]},
     {name: "hariyama", elements: ["fighting"]},
-    {name: "azurill", elements: ["normal", "fairy"]},
+    {name: "azurill", elements: ["normal", "fairy"], abilities: ['sapSipper']},
     {name: "nosepass", elements: ["rock"]},
     {name: "skitty", elements: ["normal"]},
     {name: "delcatty", elements: ["normal"]},
@@ -604,22 +647,22 @@ app.factory('PokemonFactory', function() {
     {name: "grumpig", elements: ["psychic"]},
     {name: "spinda", elements: ["normal"]},
     {name: "trapinch", elements: ["ground"]},
-    {name: "vibrava", elements: ["ground", "dragon"]},
-    {name: "flygon", elements: ["ground", "dragon"]},
-    {name: "cacnea", elements: ["grass"]},
-    {name: "cacturne", elements: ["grass", "dark"]},
+    {name: "vibrava", elements: ["ground", "dragon"], abilities: ['levitate']},
+    {name: "flygon", elements: ["ground", "dragon"], abilities: ['levitate']},
+    {name: "cacnea", elements: ["grass"], abilities: ['waterAbsorb']},
+    {name: "cacturne", elements: ["grass", "dark"], abilities: ['waterAbsorb']},
     {name: "swablu", elements: ["normal", "flying"]},
     {name: "altaria", elements: ["dragon", "flying"]},
     {name: "zangoose", elements: ["normal"]},
     {name: "seviper", elements: ["poison"]},
-    {name: "lunatone", elements: ["rock", "psychic"]},
-    {name: "solrock", elements: ["rock", "psychic"]},
+    {name: "lunatone", elements: ["rock", "psychic"], abilities: ['levitate']},
+    {name: "solrock", elements: ["rock", "psychic"], abilities: ['levitate']},
     {name: "barboach", elements: ["water", "ground"]},
     {name: "whiscash", elements: ["water", "ground"]},
     {name: "corphish", elements: ["water"]},
     {name: "crawdaunt", elements: ["water", "dark"]},
-    {name: "baltoy", elements: ["ground", "psychic"]},
-    {name: "claydol", elements: ["ground", "psychic"]},
+    {name: "baltoy", elements: ["ground", "psychic"], abilities: ['levitate']},
+    {name: "claydol", elements: ["ground", "psychic"], abilities: ['levitate']},
     {name: "lileep", elements: ["rock", "grass"]},
     {name: "cradily", elements: ["rock", "grass"]},
     {name: "anorith", elements: ["rock", "bug"]},
@@ -629,10 +672,10 @@ app.factory('PokemonFactory', function() {
     {name: "kecleon", elements: ["normal"]},
     {name: "shuppet", elements: ["ghost"]},
     {name: "banette", elements: ["ghost"]},
-    {name: "duskull", elements: ["ghost"]},
+    {name: "duskull", elements: ["ghost"], abilities: ['levitate']},
     {name: "dusclops", elements: ["ghost"]},
     {name: "tropius", elements: ["grass", "flying"]},
-    {name: "chimecho", elements: ["psychic"]},
+    {name: "chimecho", elements: ["psychic"], abilities: ['levitate']},
     {name: "absol", elements: ["dark"]},
     {name: "wynaut", elements: ["psychic"]},
     {name: "snorunt", elements: ["ice"]},
@@ -654,7 +697,7 @@ app.factory('PokemonFactory', function() {
     {name: "regirock", elements: ["rock"]},
     {name: "regice", elements: ["ice"]},
     {name: "registeel", elements: ["steel"]},
-    {name: "latias", elements: ["dragon", "psychic"]},
+    {name: "latias", elements: ["dragon", "psychic"], abilities: ['levitate']},
     {name: "latios", elements: ["dragon", "psychic"]},
     {name: "kyogre", elements: ["water"]},
     {name: "groudon", elements: ["ground"]},
@@ -690,7 +733,7 @@ app.factory('PokemonFactory', function() {
     {name: "mothim", elements: ["bug", "flying"]},
     {name: "combee", elements: ["bug", "flying"]},
     {name: "vespiquen", elements: ["bug", "flying"]},
-    {name: "pachirisu", elements: ["electric"]},
+    {name: "pachirisu", elements: ["electric"], abilities: ['voltAbsorb']},
     {name: "buizel", elements: ["water"]},
     {name: "floatzel", elements: ["water"]},
     {name: "cherubi", elements: ["grass"]},
@@ -702,15 +745,15 @@ app.factory('PokemonFactory', function() {
     {name: "drifblim", elements: ["ghost", "flying"]},
     {name: "buneary", elements: ["normal"]},
     {name: "lopunny", elements: ["normal"]},
-    {name: "mismagius", elements: ["ghost"]},
+    {name: "mismagius", elements: ["ghost"], abilities: ['levitate']},
     {name: "honchkrow", elements: ["dark", "flying"]},
     {name: "glameow", elements: ["normal"]},
     {name: "purugly", elements: ["normal"]},
-    {name: "chingling", elements: ["psychic"]},
+    {name: "chingling", elements: ["psychic"], abilities: ['levitate']},
     {name: "stunky", elements: ["poison", "dark"]},
     {name: "skuntank", elements: ["poison", "dark"]},
-    {name: "bronzor", elements: ["steel", "psychic"]},
-    {name: "bronzong", elements: ["steel", "psychic"]},
+    {name: "bronzor", elements: ["steel", "psychic"], abilities: ['heatProof', 'levitate']},
+    {name: "bronzong", elements: ["steel", "psychic"], abilities: ['heatProof', 'levitate']},
     {name: "bonsly", elements: ["rock"]},
     {name: "mime jr.", elements: ["psychic", "fairy"]},
     {name: "happiny", elements: ["normal"]},
@@ -728,10 +771,10 @@ app.factory('PokemonFactory', function() {
     {name: "drapion", elements: ["poison", "dark"]},
     {name: "croagunk", elements: ["poison", "fighting"]},
     {name: "toxicroak", elements: ["poison", "fighting"]},
-    {name: "carnivine", elements: ["grass"]},
+    {name: "carnivine", elements: ["grass"], abilities: ['levitate']},
     {name: "finneon", elements: ["water"]},
     {name: "lumineon", elements: ["water"]},
-    {name: "mantyke", elements: ["water", "flying"]},
+    {name: "mantyke", elements: ["water", "flying"], abilities: ['waterAbsorb']},
     {name: "snover", elements: ["grass", "ice"]},
     {name: "abomasnow", elements: ["grass", "ice"]},
     {name: "weavile", elements: ["dark", "ice"]},
@@ -752,15 +795,15 @@ app.factory('PokemonFactory', function() {
     {name: "probopass", elements: ["rock", "steel"]},
     {name: "dusknoir", elements: ["ghost"]},
     {name: "froslass", elements: ["ice", "ghost"]},
-    {name: "uxie", elements: ["psychic"]},
-    {name: "mesprit", elements: ["psychic"]},
-    {name: "azelf", elements: ["psychic"]},
+    {name: "uxie", elements: ["psychic"], abilities: ['levitate']},
+    {name: "mesprit", elements: ["psychic"], abilities: ['levitate']},
+    {name: "azelf", elements: ["psychic"], abilities: ['levitate']},
     {name: "dialga", elements: ["steel", "dragon"]},
     {name: "palkia", elements: ["water", "dragon"]},
     {name: "heatran", elements: ["fire", "steel"]},
     {name: "regigigas", elements: ["normal"]},
-    {name: "giratina", elements: ["ghost", "dragon"]},
-    {name: "cresselia", elements: ["psychic"]},
+    {name: "giratina", elements: ["ghost", "dragon"], abilities: ['levitate']},
+    {name: "cresselia", elements: ["psychic"], abilities: ['levitate']},
     {name: "phione", elements: ["water"]},
     {name: "manaphy", elements: ["water"]},
     {name: "darkrai", elements: ["dark"]},
@@ -794,8 +837,8 @@ app.factory('PokemonFactory', function() {
     {name: "pidove", elements: ["normal", "flying"]},
     {name: "tranquill", elements: ["normal", "flying"]},
     {name: "unfezant", elements: ["normal", "flying"]},
-    {name: "blitzle", elements: ["electric"]},
-    {name: "zebstrika", elements: ["electric"]},
+    {name: "blitzle", elements: ["electric"], abilities: ['sapSipper']},
+    {name: "zebstrika", elements: ["electric"], abilities: ['sapSipper']},
     {name: "roggenrola", elements: ["rock"]},
     {name: "boldore", elements: ["rock"]},
     {name: "gigalith", elements: ["rock"]},
@@ -807,9 +850,9 @@ app.factory('PokemonFactory', function() {
     {name: "timburr", elements: ["fighting"]},
     {name: "gurdurr", elements: ["fighting"]},
     {name: "conkeldurr", elements: ["fighting"]},
-    {name: "tympole", elements: ["water"]},
-    {name: "palpitoad", elements: ["water", "ground"]},
-    {name: "seismitoad", elements: ["water", "ground"]},
+    {name: "tympole", elements: ["water"], abilities: ['waterAbsorb']},
+    {name: "palpitoad", elements: ["water", "ground"], abilities: ['waterAbsorb']},
+    {name: "seismitoad", elements: ["water", "ground"], abilities: ['waterAbsorb']},
     {name: "throh", elements: ["fighting"]},
     {name: "sawk", elements: ["fighting"]},
     {name: "sewaddle", elements: ["bug", "grass"]},
@@ -828,7 +871,7 @@ app.factory('PokemonFactory', function() {
     {name: "krookodile", elements: ["ground", "dark"]},
     {name: "darumaka", elements: ["fire"]},
     {name: "darmanitan", elements: ["fire", "psychic"]},
-    {name: "maractus", elements: ["grass"]},
+    {name: "maractus", elements: ["grass"], abilities: ['waterAbsorb']},
     {name: "dwebble", elements: ["bug", "rock"]},
     {name: "crustle", elements: ["bug", "rock"]},
     {name: "scraggy", elements: ["dark", "fighting"]},
@@ -857,15 +900,15 @@ app.factory('PokemonFactory', function() {
     {name: "vanillite", elements: ["ice"]},
     {name: "vanillish", elements: ["ice"]},
     {name: "vanilluxe", elements: ["ice"]},
-    {name: "deerling", elements: ["normal", "grass"]},
-    {name: "sawsbuck", elements: ["normal", "grass"]},
+    {name: "deerling", elements: ["normal", "grass"], abilities: ['sapSipper']},
+    {name: "sawsbuck", elements: ["normal", "grass"], abilities: ['sapSipper']},
     {name: "emolga", elements: ["electric", "flying"]},
     {name: "karrablast", elements: ["bug"]},
     {name: "escavalier", elements: ["bug", "steel"]},
     {name: "foongus", elements: ["grass", "poison"]},
     {name: "amoonguss", elements: ["grass", "poison"]},
-    {name: "frillish", elements: ["water", "ghost"]},
-    {name: "jellicent", elements: ["water", "ghost"]},
+    {name: "frillish", elements: ["water", "ghost"], abilities: ['waterAbsorb']},
+    {name: "jellicent", elements: ["water", "ghost"], abilities: ['waterAbsorb']},
     {name: "alomomola", elements: ["water"]},
     {name: "joltik", elements: ["bug", "electric"]},
     {name: "galvantula", elements: ["bug", "electric"]},
@@ -874,9 +917,9 @@ app.factory('PokemonFactory', function() {
     {name: "klink", elements: ["steel"]},
     {name: "klang", elements: ["steel"]},
     {name: "klinklang", elements: ["steel"]},
-    {name: "tynamo", elements: ["electric"]},
-    {name: "eelektrik", elements: ["electric"]},
-    {name: "eelektross", elements: ["electric"]},
+    {name: "tynamo", elements: ["electric"], abilities: ['levitate']},
+    {name: "eelektrik", elements: ["electric"], abilities: ['levitate']},
+    {name: "eelektross", elements: ["electric"], abilities: ['levitate']},
     {name: "elgyem", elements: ["psychic"]},
     {name: "beheeyem", elements: ["psychic"]},
     {name: "litwick", elements: ["ghost", "fire"]},
@@ -887,7 +930,7 @@ app.factory('PokemonFactory', function() {
     {name: "haxorus", elements: ["dragon"]},
     {name: "cubchoo", elements: ["ice"]},
     {name: "beartic", elements: ["ice"]},
-    {name: "cryogonal", elements: ["ice"]},
+    {name: "cryogonal", elements: ["ice"], abilities: ['levitate']},
     {name: "shelmet", elements: ["bug"]},
     {name: "accelgor", elements: ["bug"]},
     {name: "stunfisk", elements: ["ground", "electric"]},
@@ -898,7 +941,7 @@ app.factory('PokemonFactory', function() {
     {name: "golurk", elements: ["ground", "ghost"]},
     {name: "pawniard", elements: ["dark", "steel"]},
     {name: "bisharp", elements: ["dark", "steel"]},
-    {name: "bouffalant", elements: ["normal"]},
+    {name: "bouffalant", elements: ["normal"], abilities: ['sapSipper']},
     {name: "rufflet", elements: ["normal", "flying"]},
     {name: "braviary", elements: ["normal", "flying"]},
     {name: "vullaby", elements: ["dark", "flying"]},
@@ -907,14 +950,14 @@ app.factory('PokemonFactory', function() {
     {name: "durant", elements: ["bug", "steel"]},
     {name: "deino", elements: ["dark", "dragon"]},
     {name: "zweilous", elements: ["dark", "dragon"]},
-    {name: "hydreigon", elements: ["dark", "dragon"]},
+    {name: "hydreigon", elements: ["dark", "dragon"], abilities: ['levitate']},
     {name: "larvesta", elements: ["bug", "fire"]},
     {name: "volcarona", elements: ["bug", "fire"]},
     {name: "cobalion", elements: ["steel", "fighting"]},
     {name: "terrakion", elements: ["rock", "fighting"]},
     {name: "virizion", elements: ["grass", "fighting"]},
     {name: "tornadus", elements: ["flying"]},
-    {name: "thundurus", elements: ["electric", "flying"]},
+    {name: "thundurus", elements: ["electric", "flying"], abilities: ['voltAbsorb']},
     {name: "reshiram", elements: ["dragon", "fire"]},
     {name: "zekrom", elements: ["dragon", "electric"]},
     {name: "landorus", elements: ["ground", "flying"]},
@@ -943,7 +986,7 @@ app.factory('PokemonFactory', function() {
     {name: "flabebe", elements: ["fairy"]},
     {name: "floette", elements: ["fairy"]},
     {name: "florges", elements: ["fairy"]},
-    {name: "skiddo", elements: ["grass"]},
+    {name: "skiddo", elements: ["grass"], abilities: ['sapSipper']},
     {name: "gogoat", elements: ["grass"]},
     {name: "pancham", elements: ["fighting"]},
     {name: "pangoro", elements: ["fighting", "dark"]},
