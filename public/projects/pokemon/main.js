@@ -2,21 +2,56 @@ var app = angular.module('pokemonApp', []);
 
 app.controller('PokemonCtrl', ['$scope', 'AttackModifiersFactory', function($scope, AttackModifiersFactory) {
 
+  $scope.data = {};
+  $scope.data.previousSearches = [];
+  var MAX_PREVOUS_SEARCHES = 5;
+
+  scope = $scope;
+
+  $scope.clear = function() {
+    $scope.data.inputPokemon = '';
+  }
+
   function findPokemon(searchName) {
     searchName = searchName.toLowerCase();
     var results =  _.filter(AttackModifiersFactory.overallPokemonModifiers, function(pokemon) {
-      return pokemon['name'].indexOf(searchName) !== -1;
+      var searchIndex = pokemon['name'].indexOf(searchName);
+      
+      if (searchIndex !== -1) {
+        //used to rank the searches
+        pokemon.searchIndex = searchIndex;
+        // console.log(pokemon)
+      }
+
+      return searchIndex !== -1;
+    });
+
+    results.sort(function(a, b) {
+      return a.searchIndex > b.searchIndex;
     })
     return results;
   }
 
+  $scope.usePrevSearch = function(searchPokemonIndex) {
+    //removes the entry selected from previousSearches (to prevent duplicate keys)
+    var searchPokemon = $scope.data.previousSearches.splice(searchPokemonIndex, 1);
+    $scope.data.inputPokemon = searchPokemon[0];
+    $scope.searchForPokemon();
+  }
+
   $scope.searchForPokemon = function() {
     var searchResults = findPokemon($scope.data.inputPokemon);
+    
+    if (searchResults.length > 0) {
+      //adds search item to end of array; if length exceeds max, remove first item of array
+      $scope.data.previousSearches.push($scope.data.inputPokemon);
+      if ($scope.data.previousSearches.length > MAX_PREVOUS_SEARCHES) $scope.data.previousSearches.shift();
+    }
+
     for (var i = 0; i < searchResults.length; i++) {
       //converts name to full upper case
       searchResults[i].editedName = searchResults[i].name.toUpperCase();
 
-      // console.log(searchResults)
       var temp = [];
       for (var key in searchResults[i].modifiers) {
         //if modifier is 1, do not show
