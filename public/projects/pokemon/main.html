@@ -36,7 +36,6 @@
           <ul>
             <li ng-repeat='pokemon in pokemonModifiers'> 
               <p>Name: {{ pokemon.editedName }} {{ pokemon.elements }}</p>
-              <p>{{ pokemon.elementsToBeAvoided }}</p>
               <ul>
                 <li ng-repeat='element in pokemon.editedModifiers'
                 ng-class='{"text-danger": element.modifier < 1, bold: element.modifier < 0.5 || element.modifier > 2}'>{{ element.element }}: {{ element.modifier }} 
