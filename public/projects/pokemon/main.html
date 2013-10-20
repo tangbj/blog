@@ -39,7 +39,7 @@
               <ul>
                 <li ng-repeat='element in pokemon.editedModifiers'
                 ng-class='{"text-danger": element.modifier < 1, bold: element.modifier < 0.5 || element.modifier > 2}'>{{ element.element }}: {{ element.modifier }} 
-                <span ng-show='element.toBeAvoided'>(Avoid)</span></li>
+                <span ng-show='element.toBeAvoided'>(Avoid using this type of Pokemon)</span></li>
               </ul>
             </li>
           </ul>
