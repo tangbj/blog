@@ -7,38 +7,40 @@
     <script src='main.js'></script>
   </head>
   <body ng-app='pokemonApp'>
-    <div class="container">
-      <div ng-controller='PokemonCtrl'>
-        <p>
-          <b>UPDATE:
-          New features include a) support for previous searches, b) smarter system of listing search results, and c) input box reset on focus.
-          </b> 
-        </p>
-        <p> Step 1: Input pokemon name (partial searches - e.g. char for Charmander are supported)</p>
-        <p> Step 2: Click SEARCH</p>
-        <p> Step 3: The effectiveness of the respective elements are shown (the higher the number, the more effective the attack)</p>
-        <form ng-submit='searchForPokemon()'>
-          <input type='text' ng-model='data.inputPokemon' ng-focus='clear()' />
-          <input class='btn btn-primary' type='submit' value='SEARCH' />
-        </form>
-        
-        <div ng-class='{hidden: data.previousSearches.length === 0}'>
-          <h4>Previous Searches</h4>
+    <div class='container' ng-controller='PokemonCtrl'>
+      <div class='row'>
+        <div class='span12'>
+          <p>
+            <b>UPDATE:
+            New features include a) support for previous searches, b) smarter system of listing search results, and c) input box reset on focus.
+            </b> 
+          </p>
+          <p> Step 1: Input pokemon name (partial searches - e.g. char for Charmander are supported)</p>
+          <p> Step 2: Click SEARCH</p>
+          <p> Step 3: The effectiveness of the respective elements are shown (the higher the number, the more effective the attack)</p>
+          <form ng-submit='searchForPokemon()'>
+            <input type='text' ng-model='data.inputPokemon' ng-focus='clear()' />
+            <input class='btn btn-primary' type='submit' value='SEARCH' />
+          </form>
+          
+          <div ng-class='{hidden: data.previousSearches.length === 0}'>
+            <h4>Previous Searches</h4>
+            <ul>
+              <li ng-repeat='previousSearch in data.previousSearches' ng-click='usePrevSearch($index)'>{{ previousSearch }}</li>
+            </ul>
+          </div>
+
+          <h4>Pokemon Listings</h4>
           <ul>
-            <li ng-repeat='previousSearch in data.previousSearches' ng-click='usePrevSearch($index)'>{{ previousSearch }}</li>
+            <li ng-repeat='pokemon in pokemonModifiers'> 
+              <p>Name: {{ pokemon.editedName }} {{ pokemon.elements }}</p>
+              <ul>
+                <li ng-repeat='element in pokemon.editedModifiers'
+                ng-class='{"text-danger": element.modifier < 1, bold: element.modifier < 0.5 || element.modifier > 2}'>{{ element.element }}: {{ element.modifier }}</li>
+              </ul>
+            </li>
           </ul>
         </div>
-
-        <h4>Pokemon Listings</h4>
-        <ul>
-          <li ng-repeat='pokemon in pokemonModifiers'> 
-            <p>Name: {{ pokemon.editedName }} {{ pokemon.elements }}</p>
-            <ul>
-              <li ng-repeat='element in pokemon.editedModifiers'
-              ng-class='{"text-danger": element.modifier < 1, bold: element.modifier < 0.5 || element.modifier > 2}'>{{ element.element }}: {{ element.modifier }}</li>
-            </ul>
-          </li>
-        </ul>
       </div>
     </div>
   </body>

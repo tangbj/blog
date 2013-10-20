@@ -14,21 +14,26 @@ app.controller('PokemonCtrl', ['$scope', 'AttackModifiersFactory', function($sco
 
   function findPokemon(searchName) {
     searchName = searchName.toLowerCase();
+
+    //returns only pokemons that fit the searchtag
     var results =  _.filter(AttackModifiersFactory.overallPokemonModifiers, function(pokemon) {
       var searchIndex = pokemon['name'].indexOf(searchName);
       
       if (searchIndex !== -1) {
         //used to rank the searches
         pokemon.searchIndex = searchIndex;
-        // console.log(pokemon)
       }
 
       return searchIndex !== -1;
     });
 
     results.sort(function(a, b) {
-      return a.searchIndex > b.searchIndex;
+      return a.searchIndex - b.searchIndex;
     })
+
+    for(var i = 0; i < results.length; i++) {
+      console.log(results[i].name + ': ' + results[i].searchIndex)
+    }
     return results;
   }
 
@@ -79,7 +84,6 @@ app.factory('AttackModifiersFactory', function(PokemonFactory) {
   //attack multiplier for attack types vs defender types
   //if results are undefined, assume base multiplier (1)
   var attackModifiers = {};
-  var defenseModifiers = {};
   var overallPokemonModifiers = [];
 
   attackModifiers['normal'] = {};
@@ -242,27 +246,11 @@ app.factory('AttackModifiersFactory', function(PokemonFactory) {
   attackModifiers['fairy']['dragon'] = 2;
   attackModifiers['fairy']['dark'] = 2;
 
-  //inverts the attackModifiers matrix and stores data in defenseModifier matrix
-  for (var attackElement in attackModifiers) {
-    var temp = attackModifiers[attackElement];
-    for (var defenseElement in temp) {
-      if (typeof defenseModifiers[defenseElement] === 'undefined') defenseModifiers[defenseElement] = {};
-      defenseModifiers[defenseElement][attackElement] = temp[defenseElement]; 
-    }
-  }
-
   //the attack modifiers that will used when a pokemon is attacking 
   //if elements are not defined, assume base value of 1
   function getAttackModifiers(attack, defense) {
     if (typeof attackModifiers[attack][defense] === 'undefined') return 1;
     return attackModifiers[attack][defense];
-  }
-
-  //the attack modifiers that will used when a pokemon is defending 
-  //if elements are not defined, assume base value of 1
-  function getDefenseModifiers(defense, attack) {
-    if (typeof defenseModifiers[defense][attack] === 'undefined') return 1;
-    return defenseModifiers[defense][attack];
   }
 
   //given a pokemon name, return the elements of the pokemon
@@ -310,11 +298,11 @@ app.factory('AttackModifiersFactory', function(PokemonFactory) {
 
         //initializes the resultsMatrix with each of the elements and sets modifiers to 1
         if (typeof resultsMatrix[element] === 'undefined') {
-          resultsMatrix[element] = getDefenseModifiers(pokemonElements[i], elementsList[j]);
+          resultsMatrix[element] = getAttackModifiers(elementsList[j], pokemonElements[i]);
         } 
         //otherwise multiplies the defense modifiers from the second element
         else {
-          resultsMatrix[element] *= getDefenseModifiers(pokemonElements[i], elementsList[j]);        
+          resultsMatrix[element] *= getAttackModifiers(elementsList[j], pokemonElements[i]);        
         }
 
       } //end inner for loop
