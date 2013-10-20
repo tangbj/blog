@@ -12,7 +12,7 @@
         <div class='span12'>
           <p>
             <b>UPDATE:
-            New features include a) support for previous searches, b) smarter system of listing search results, and c) input box reset on focus.
+              Included an calculation that determines which element to avoid using (for defense purposes)
             </b> 
           </p>
           <p> Step 1: Input pokemon name (partial searches - e.g. char for Charmander are supported)</p>
@@ -26,7 +26,9 @@
           <div ng-class='{hidden: data.previousSearches.length === 0}'>
             <h4>Previous Searches</h4>
             <ul>
-              <li ng-repeat='previousSearch in data.previousSearches' ng-click='usePrevSearch($index)'>{{ previousSearch }}</li>
+              <li ng-repeat='previousSearch in data.previousSearches' ng-click='usePrevSearch($index)'>
+                <a href='#'>{{ previousSearch }}</a>
+              </li>
             </ul>
           </div>
 
@@ -34,9 +36,11 @@
           <ul>
             <li ng-repeat='pokemon in pokemonModifiers'> 
               <p>Name: {{ pokemon.editedName }} {{ pokemon.elements }}</p>
+              <p>{{ pokemon.elementsToBeAvoided }}</p>
               <ul>
                 <li ng-repeat='element in pokemon.editedModifiers'
-                ng-class='{"text-danger": element.modifier < 1, bold: element.modifier < 0.5 || element.modifier > 2}'>{{ element.element }}: {{ element.modifier }}</li>
+                ng-class='{"text-danger": element.modifier < 1, bold: element.modifier < 0.5 || element.modifier > 2}'>{{ element.element }}: {{ element.modifier }} 
+                <span ng-show='element.toBeAvoided'>(Avoid)</span></li>
               </ul>
             </li>
           </ul>

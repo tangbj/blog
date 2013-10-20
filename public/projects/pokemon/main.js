@@ -31,9 +31,6 @@ app.controller('PokemonCtrl', ['$scope', 'AttackModifiersFactory', function($sco
       return a.searchIndex - b.searchIndex;
     })
 
-    for(var i = 0; i < results.length; i++) {
-      console.log(results[i].name + ': ' + results[i].searchIndex)
-    }
     return results;
   }
 
@@ -47,12 +44,20 @@ app.controller('PokemonCtrl', ['$scope', 'AttackModifiersFactory', function($sco
   $scope.searchForPokemon = function() {
     var searchResults = findPokemon($scope.data.inputPokemon);
     
+    //adds search item to end of array; if length exceeds max, remove first item of array
     if (searchResults.length > 0) {
-      //adds search item to end of array; if length exceeds max, remove first item of array
+      var indexOfPos = $scope.data.previousSearches.indexOf($scope.data.inputPokemon) 
+      
+      //if entry already exists, remove it from the array of previous searches (prevents duplicate keys)
+      if (indexOfPos !== -1) {
+        $scope.data.previousSearches.splice(indexOfPos, 1);
+      }
+
       $scope.data.previousSearches.push($scope.data.inputPokemon);
       if ($scope.data.previousSearches.length > MAX_PREVOUS_SEARCHES) $scope.data.previousSearches.shift();
     }
 
+    // console.log(searchResults)
     for (var i = 0; i < searchResults.length; i++) {
       //converts name to full upper case
       searchResults[i].editedName = searchResults[i].name.toUpperCase();
@@ -63,7 +68,8 @@ app.controller('PokemonCtrl', ['$scope', 'AttackModifiersFactory', function($sco
         if (searchResults[i].modifiers[key] !== 1) {
           temp.push({
             element: key,
-            modifier: searchResults[i].modifiers[key] 
+            modifier: searchResults[i].modifiers[key],
+            toBeAvoided: searchResults[i].elementsToBeAvoided.indexOf(key) !== -1
           });
         }
       } //end for loop
@@ -71,7 +77,7 @@ app.controller('PokemonCtrl', ['$scope', 'AttackModifiersFactory', function($sco
       //sort according to modifier (descending order)
       temp.sort(function(a, b) {
         return b.modifier - a.modifier;
-      })
+      });
       searchResults[i].editedModifiers = temp;
     }
 
@@ -85,6 +91,7 @@ app.factory('AttackModifiersFactory', function(PokemonFactory) {
   //if results are undefined, assume base multiplier (1)
   var attackModifiers = {};
   var overallPokemonModifiers = [];
+  var that = this;
 
   attackModifiers['normal'] = {};
   attackModifiers['fire'] = {};
@@ -286,6 +293,15 @@ app.factory('AttackModifiersFactory', function(PokemonFactory) {
     }
   }
 
+  //finds the elements to be avoided assuming it is against an element (passed in)
+  function getElementsToBeAvoided(elementsToBeAvoidedArray, element) {
+    for(var key in attackModifiers[element]) {
+      if (attackModifiers[element][key] > 1) {
+        if (elementsToBeAvoidedArray.indexOf(key) === -1) elementsToBeAvoidedArray.push(key);
+      }
+    } //end for loop
+  } //end getElementStrength function
+
   //given a pokemon's name, return a matrix of the various elements attack modifiers against it
   function computeResultsMatrix(name) {
     var pokemonElements = getPokemonElement(name);
@@ -311,31 +327,45 @@ app.factory('AttackModifiersFactory', function(PokemonFactory) {
     return resultsMatrix;
   } //end computeResultsMatrix function
 
-  for (var i = 0; i < PokemonFactory.length; i++) {
-    var pokemon = PokemonFactory[i].name, ability, resultsMatrix;
+  //initialises all pokemon data
+  function init() {
+    //loops through all the pokemons
+    for (var i = 0; i < PokemonFactory.length; i++) {
+      var pokemon = PokemonFactory[i].name, ability, resultsMatrix;
 
-    if (typeof PokemonFactory[i].abilities === 'undefined') {
-      abilities = [];
-    } else {
-      abilities = PokemonFactory[i].abilities;
+      if (typeof PokemonFactory[i].abilities === 'undefined') {
+        abilities = [];
+      } else {
+        abilities = PokemonFactory[i].abilities;
+      }
+
+      //obtains the results matrix for each pokemon and modifies it accordingly to its abilities
+      resultsMatrix = computeResultsMatrix(pokemon);
+
+      //for all selected pokemons, account for abilities (impact to results matrix)
+      for ( var j = 0; j < abilities.length; j++) {
+        modifyResultMatrixForPokemonAbility(resultsMatrix, abilities[j]);  
+      }
+
+      var pokemonElements = getPokemonElement(pokemon);
+      var elementsToBeAvoidedArray = [];
+      for (var k = 0; k < pokemonElements.length; k++) {
+        getElementsToBeAvoided(elementsToBeAvoidedArray, pokemonElements[k]);
+      }
+
+      overallPokemonModifiers.push({
+        name: pokemon,
+        elements: PokemonFactory[i].elements,
+        abilities: PokemonFactory[i].abilities,
+        modifiers: resultsMatrix,
+        elementsToBeAvoided: elementsToBeAvoidedArray
+      });
     }
 
-    //obtains the results matrix for each pokemon and modifies it accordingly to its abilities
-    resultsMatrix = computeResultsMatrix(pokemon);
-
-    for ( var j = 0; j < abilities.length; j++) {
-      modifyResultMatrixForPokemonAbility(resultsMatrix, abilities[j]);  
-    }
-    
-    overallPokemonModifiers.push({
-      name: pokemon,
-      elements: PokemonFactory[i].elements,
-      abilities: PokemonFactory[i].abilities,
-      modifiers: resultsMatrix
-    });
-  }
-  this.overallPokemonModifiers = overallPokemonModifiers;
-
+    that.overallPokemonModifiers = overallPokemonModifiers;
+  } //end init function
+  
+  init();
   return this;
 })
 
