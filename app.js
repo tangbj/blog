@@ -71,6 +71,8 @@ app.get('/api/getpost/:queryKey', api.getPost);
 app.post('/api/newpost', api.newPost);
 app.put('/api/editpost/:id', api.editPost);
 
+app.get('/api/checkrss', api.checkRSS);
+
 // redirect all others to the index (HTML5 history)
 app.get('*', routes.index);
 

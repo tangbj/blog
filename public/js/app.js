@@ -19,6 +19,10 @@ config(function ($routeProvider, $locationProvider) {
       templateUrl: 'partials/blog',
       controller: 'BlogCtrl'
     }).
+    when('/projects/rss', {
+      templateUrl: 'partials/rss',
+      controller: 'RSSCtrl'      
+    }).
     when('/projects', {
       templateUrl: 'partials/projects',
       controller: 'ProjectCtrl'

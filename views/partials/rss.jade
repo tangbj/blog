@@ -1,0 +1,9 @@
+h3 RSS
+
+ul
+  li(ng-repeat='result in data.results')
+    b Link: 
+    a(href='{{ result.link }}') {{result.link}}
+    br
+    b Keywords: 
+    | {{ result.keywords }}

@@ -118,4 +118,22 @@ angular.module('myApp.controllers', []).
         $scope.showSuccessMessage = true;
       })
     }
-  }]);
+  }]).
+  controller('ProjectCtrl', ['$scope', function($scope) {
+
+  }]).
+  controller('RSSCtrl', ['$scope', '$http', function($scope, $http) {
+    $scope.data = {};
+    $scope.data.results = [];
+
+    $http.get('/api/checkrss').success(function(results) {
+      var temp = results['results'];
+      console.log(results)
+      for(var key in temp) {
+        $scope.data.results.push({
+          link: key,
+          keywords: temp[key].join(' ')
+        });
+      }
+    })
+  }])
