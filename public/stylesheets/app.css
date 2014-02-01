@@ -54,3 +54,10 @@
 .newpost textarea {
   width: 750px;
 }
+.rss input[type="text"] {
+  width: 500px;
+}
+.rss .check-button {
+  margin: 10px 0;
+  width: 200px;
+}

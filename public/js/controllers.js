@@ -122,18 +122,99 @@ angular.module('myApp.controllers', []).
   controller('ProjectCtrl', ['$scope', function($scope) {
 
   }]).
-  controller('RSSCtrl', ['$scope', '$http', function($scope, $http) {
+  controller('RSSCtrl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
     $scope.data = {};
     $scope.data.results = [];
+    $scope.data.initialLoadMessage = 'Trawling in-progress';
+    $scope.data.trawled = false;
 
-    $http.get('/api/checkrss').success(function(results) {
-      var temp = results['results'];
-      console.log(results)
-      for(var key in temp) {
-        $scope.data.results.push({
-          link: key,
-          keywords: temp[key].join(' ')
-        });
+
+    //basic animation of the text
+    (function () {
+      var i = 0;
+      function animate() {
+        var dots;
+        //animate only if the rss hasn't been loaded
+        if (!$scope.data.trawled) {
+          $timeout(function() {
+
+            //creates string with repeated dots; if i is 0, then no dots are created
+            dots = new Array(i + 1).join('.');
+
+            $scope.data.initialLoadMessage = 'Trawling in-progress' + dots;
+            animate();
+            //max of 7 dots are showed
+            i = (i + 1) % 8;
+          }, 200);                
+        }
       }
+      animate();
+    })();
+
+    //trawling different blogsites
+    var startTime = Date.now();
+    $http.get('/api/checkrss').success(function(results) {
+      console.log('Time Elasped: ' + (Date.now() - startTime));
+      var temp = results['results'];
+      for(var key in temp) {
+        for(var i = 0; i < temp[key].length; i++) {
+          $scope.data.results.push({
+            website: key,
+            text: stripHTML(temp[key][i].text),
+            title: temp[key][i].title,
+            link: temp[key][i].link,
+            show: false
+          });
+        }
+      }
+      console.log($scope.data.results);
+      //once rss data has been downloaded, display search form
+      $scope.data.trawled = true;
     })
+
+    //function to strip HTML tags using the browser
+    function stripHTML(html) {
+      //strips out out any image tags to prevent system from loading all the images in the blog posts
+      var regex = /<img.+?>/g,
+        modifiedHTML = html.replace(regex, '');
+
+      var div = document.createElement('div');
+      div.innerHTML = modifiedHTML;
+      return div.innerText;
+    }
+
+    function checkBlogPostContainsKeyWords(post, keywords) {
+      var results = [];
+      for (var i = 0; i < keywords.length; i++) {
+        if (post.indexOf(keywords[i]) !== -1) {
+          results.push(keywords[i]);
+        }
+      }
+      return results;
+    }
+
+    $scope.checkWords = function() {
+      if (typeof $scope.data.keywords !== 'undefined') {
+        var arrKeywords = getKeywords($scope.data.keywords);
+        _.each($scope.data.results, function(result) {
+          // console.log(checkBlogPostContainsKeyWords(result.text, arrKeywords));
+          if (checkBlogPostContainsKeyWords(result.text, arrKeywords).length > 0) {
+            result.show = true;
+          } else {
+            result.show = false;
+          }
+        })
+        // //for each key word
+        // _.each(getKeywords($scope.data.keywords)) {
+
+        // }
+      }      
+    }
+
+    function getKeywords(keywords) {
+      return keywords.toLowerCase().split(',');
+    }
+
+
+
   }])

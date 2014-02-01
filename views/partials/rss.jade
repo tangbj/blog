@@ -1,9 +1,23 @@
-h3 RSS
+div.rss
+  h3 RSS
 
-ul
-  li(ng-repeat='result in data.results')
-    b Link: 
-    a(href='{{ result.link }}') {{result.link}}
+  div(ng-show='!data.trawled')
+    | {{ data.initialLoadMessage }}
+
+  div(ng-show='data.trawled')
+    input(type='text', ng-model='data.keywords', placeholder='Enter keywords separated by commas...', ng-change='checkWords()')
     br
-    b Keywords: 
-    | {{ result.keywords }}
+    //- button.btn.btn-primary.check-button(ng-click='checkWords()') Search Keywords
+
+    ul
+      li(ng-repeat='result in data.results | show')
+        b Link: 
+        a(href='{{ result.link }}') {{result.link}}
+        br
+        | Website: {{ result.website }}
+        br
+        | Title: {{ result.title }}
+        br
+        br
+
+

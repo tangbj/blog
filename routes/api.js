@@ -125,54 +125,35 @@ function checkRSSHelper(feedUrl) {
   return deferred.promise;
 }
 
-
  exports.checkRSS = function(req, res) {
 
-  var blogUrls = ['http://simplymommie.com/feed', 'http://miracule.blogspot.com/feeds/posts/default', 
-    'http://littlebluebottle.blogspot.com/feeds/posts/default', 'http://kidsrsimple.com/feed/'],
+  var blogUrls = ['http://simplymommie.com/feed', 'http://miracule.blogspot.com/feeds/posts/default', 'http://www.motherinc.org/feed/',
+    'http://littlebluebottle.blogspot.com/feeds/posts/default', 'http://kidsrsimple.com/feed/', 'http://motherkao.com/feed/', 
+    'http://feeds.feedburner.com/SakuraHaruka', 'http://intheweehours.wordpress.com/feed/', 'http://makingmum.blogspot.com/feeds/posts/default',
+    'http://blogaaholic.com/feed/', 'http://www.gingerbreadmum.com/feeds/posts/default', 'http://feeds.feedburner.com/MadpsychmumUniversityOfMotherhood', 'http://www.oureverydaythings.com/feed/',
+    'http://www.peipeihaohao.com/feeds/posts/default', 'http://edunloaded.com/feed/', 'http://feeds.feedburner.com/prunenurture',
+    'http://blogfather.sg/feed/', 'http://thelovingmum.sg/feed/', 'http://www.tanfamilychronicles.com/feeds/posts/default',
+    'http://owlswellblog.wordpress.com/feed/'];
     results = {},
-    currPromise = Q(1);
-
-  if (blogUrls.length > 0) currPromise = checkRSSHelper(blogUrls[0]);
+    arrPromises = [];
 
   for (var i = 1, len = blogUrls.length; i < len; i++) {
-    console.log('looping');
+    (function(url) {
+      arrPromises.push(checkRSSHelper(url));
+    })(blogUrls[i]);
+  };
 
-    (function(num){
-
-      currPromise = currPromise.then(function(data) {
-        //takes the posts that contains the keywords and combines it with the results object
-        results = _.extend(results, data);
-        //returns a promise
-        return checkRSSHelper(blogUrls[num]);
-      });
-
-    })(i);
-
-  }
-
-  // use a promise to ensure that json is returned only after all the blogs have been checked
-  currPromise.then(function(data) {
-    results = _.extend(results, data);
+  //trawls websites asynchronously, and returns the results when all are done
+  Q.all(arrPromises).then(function(arrPromisesResults) {
+    console.log('all done');
+    console.log('***********************')
+    for(var j = 0; j < arrPromisesResults.length; j++) {
+      results = _.extend(results, arrPromisesResults[j]);
+    }
     return res.json({
       results: results
-    })     
+    });
   })
-
-  // var results = {};
-  // //use a promise to ensure that json is returned only after all the blogs have been checked
-  // checkRSSHelper('http://simplymommie.com/feed').
-  // then(function() {
-  //   return checkRSSHelper('http://miracule.blogspot.com/feeds/posts/default')
-  // }).
-  // then(function(data) {
-  //   console.log('promised stuff');
-  //   console.log(data);
-  //   results = _.extend(results, data);
-  //   return res.json({
-  //     results: results
-  //   })      
-  // })
  }
 
 /* 

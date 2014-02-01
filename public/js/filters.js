@@ -11,4 +11,9 @@ angular.module('myApp.filters', []).
       }
       return results
     }
-  });
+  })
+  .filter('show', function() {
+    return function(input) {
+      return _.where(input, {show: true});
+    }
+  })
